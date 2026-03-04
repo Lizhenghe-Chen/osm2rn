@@ -12,7 +12,7 @@ import json
 import warnings
 warnings.filterwarnings('ignore')
 
-DATASET_DIR = Path('shanghai_dataset')
+DATASET_DIR = Path('Geneva')
 
 
 def dataset_path(*parts):

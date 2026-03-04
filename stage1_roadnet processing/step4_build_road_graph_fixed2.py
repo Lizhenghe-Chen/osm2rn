@@ -12,7 +12,7 @@ import time
 from pathlib import Path
 import shapefile
 
-DATASET_DIR = Path('shanghai_dataset')
+DATASET_DIR = Path('Geneva')
 
 
 def dataset_path(*parts):
