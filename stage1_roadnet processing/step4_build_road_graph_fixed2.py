@@ -10,18 +10,25 @@ import pickle
 import json
 import time
 from pathlib import Path
+import os
 import shapefile
 
-DATASET_DIR = Path('Geneva')
+INPUT_DATASET_DIR = Path(os.getenv('ROADNET_INPUT_DIR', 'Geneva'))
+OUTPUT_BASE_DIR = Path(os.getenv('ROADNET_OUTPUT_DIR', str(INPUT_DATASET_DIR)))
+ROAD_NETWORK_DIR = OUTPUT_BASE_DIR / 'road_network'
 
 
-def dataset_path(*parts):
-    return str(DATASET_DIR.joinpath(*parts))
+def input_path(*parts):
+    return str(INPUT_DATASET_DIR.joinpath(*parts))
+
+
+def road_network_path(*parts):
+    return str(ROAD_NETWORK_DIR.joinpath(*parts))
 
 def load_processed_nodes():
     """加载处理过的节点数据"""
     print("正在加载节点数据...")
-    nodes_df = pd.read_csv(dataset_path('road_network', 'nodes_processed.csv'))
+    nodes_df = pd.read_csv(road_network_path('nodes_processed.csv'))
     print(f"加载了 {len(nodes_df)} 个节点")
     print(f"节点数据列名: {list(nodes_df.columns)}")
     return nodes_df
@@ -31,7 +38,7 @@ def extract_edge_connectivity_from_shapefile():
     print("正在从shapefile提取边连接信息...")
     
     # 读取边的shapefile
-    shp_path = dataset_path('edges')
+    shp_path = input_path('edges')
     edges_sf = shapefile.Reader(shp_path)
     
     edges_data = []
@@ -224,7 +231,7 @@ def save_results(G, features_array, node_ids):
     print("保存结果...")
     
     # 确保目录存在
-    output_dir = DATASET_DIR / 'road_network'
+    output_dir = ROAD_NETWORK_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
     
     # 保存图
@@ -262,6 +269,8 @@ def save_results(G, features_array, node_ids):
 def main():
     """主函数"""
     print("=== Step 4.2: 修复路网图构建 ===")
+    print(f"输入目录: {INPUT_DATASET_DIR}")
+    print(f"输出目录: {OUTPUT_BASE_DIR}")
     
     try:
         # 1. 加载节点数据

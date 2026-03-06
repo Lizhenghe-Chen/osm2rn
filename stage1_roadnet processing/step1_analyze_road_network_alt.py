@@ -9,21 +9,27 @@ import pandas as pd
 import numpy as np
 from pathlib import Path
 import json
+import os
 import warnings
 warnings.filterwarnings('ignore')
 
-DATASET_DIR = Path('Geneva')
+INPUT_DATASET_DIR = Path(os.getenv('ROADNET_INPUT_DIR', 'Geneva'))
+OUTPUT_BASE_DIR = Path(os.getenv('ROADNET_OUTPUT_DIR', str(INPUT_DATASET_DIR)))
 
 
-def dataset_path(*parts):
-    return str(DATASET_DIR.joinpath(*parts))
+def input_path(*parts):
+    return str(INPUT_DATASET_DIR.joinpath(*parts))
+
+
+def output_path(*parts):
+    return str(OUTPUT_BASE_DIR.joinpath(*parts))
 
 def create_output_dirs():
     """创建输出目录"""
     dirs = [
-        dataset_path('road_network'),
-        dataset_path('mapping'),
-        dataset_path('reports')
+        output_path('road_network'),
+        output_path('mapping'),
+        output_path('reports')
     ]
     for dir_path in dirs:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
@@ -36,7 +42,7 @@ def analyze_road_nodes():
     
     try:
         # 使用pyshp读取nodes shapefile
-        nodes_path = dataset_path('nodes')
+        nodes_path = input_path('nodes')
         sf = shapefile.Reader(nodes_path)
         
         shapes = sf.shapes()
@@ -114,9 +120,9 @@ def analyze_road_nodes():
                     values = [record[j] if j < len(record) else None for record in records]
                     nodes_df[field] = values[:len(coordinates)]
             
-            output_path = dataset_path('road_network', 'nodes_processed.csv')
-            nodes_df.to_csv(output_path, index=False)
-            print(f"\n💾 节点数据已保存: {output_path}")
+            output_file = output_path('road_network', 'nodes_processed.csv')
+            nodes_df.to_csv(output_file, index=False)
+            print(f"\n💾 节点数据已保存: {output_file}")
             
             sf.close()
             
@@ -154,7 +160,7 @@ def analyze_road_edges():
     
     try:
         # 使用pyshp读取edges shapefile
-        edges_path = dataset_path('edges')
+        edges_path = input_path('edges')
         sf = shapefile.Reader(edges_path)
         
         shapes = sf.shapes()
@@ -237,9 +243,9 @@ def analyze_road_edges():
             values = [record[field_idx] if field_idx < len(record) else None for record in records]
             edges_df[field] = values
         
-        output_path = dataset_path('road_network', 'edges_processed.csv')
-        edges_df.to_csv(output_path, index=False)
-        print(f"\n💾 边数据已保存: {output_path}")
+        output_file = output_path('road_network', 'edges_processed.csv')
+        edges_df.to_csv(output_file, index=False)
+        print(f"\n💾 边数据已保存: {output_file}")
         
         sf.close()
         
@@ -268,7 +274,7 @@ def check_spatial_overlap(nodes_info):
     
     try:
         # 读取格子数据
-        grid_file = dataset_path('shanghai_grid_chengdu_format.csv')
+        grid_file = input_path('shanghai_grid_chengdu_format.csv')
         grids = pd.read_csv(grid_file)
         
         print(f"📊 格子数据:")
@@ -360,14 +366,14 @@ def generate_analysis_report(nodes_info, edges_info, overlap_info):
     }
     
     # 保存JSON报告
-    report_path = dataset_path('reports', 'road_network_analysis.json')
+    report_path = output_path('reports', 'road_network_analysis.json')
     with open(report_path, 'w', encoding='utf-8') as f:
         json.dump(report, f, ensure_ascii=False, indent=2, default=str)
     
     print(f"✅ 分析报告已保存: {report_path}")
     
     # 生成Markdown报告
-    md_report_path = dataset_path('reports', 'road_network_analysis.md')
+    md_report_path = output_path('reports', 'road_network_analysis.md')
     with open(md_report_path, 'w', encoding='utf-8') as f:
         f.write("# 上海路网数据分析报告\n\n")
         f.write(f"**分析日期**: 2025-09-08\n\n")
@@ -406,6 +412,8 @@ def main():
     """主分析函数"""
     print("🛣️ Step 1.1: 上海路网数据结构分析（备用版本）")
     print("=" * 60)
+    print(f"输入目录: {INPUT_DATASET_DIR}")
+    print(f"输出目录: {OUTPUT_BASE_DIR}")
     
     # 创建输出目录
     create_output_dirs()
@@ -432,10 +440,10 @@ def main():
         print(f"✅ 空间重叠: {overlap_info.get('coverage_ratio', 0)*100:.1f}% 覆盖率")
     
     print(f"\n📂 输出文件:")
-    print(f"- {dataset_path('road_network', 'nodes_processed.csv')}")
-    print(f"- {dataset_path('road_network', 'edges_processed.csv')}")
-    print(f"- {dataset_path('reports', 'road_network_analysis.json')}")
-    print(f"- {dataset_path('reports', 'road_network_analysis.md')}")
+    print(f"- {output_path('road_network', 'nodes_processed.csv')}")
+    print(f"- {output_path('road_network', 'edges_processed.csv')}")
+    print(f"- {output_path('reports', 'road_network_analysis.json')}")
+    print(f"- {output_path('reports', 'road_network_analysis.md')}")
     
     print(f"\n🎯 **准备就绪，可以开始 Step 2.1: 格子到节点映射！**")
 
