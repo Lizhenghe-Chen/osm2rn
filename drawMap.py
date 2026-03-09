@@ -8,7 +8,7 @@ def draw_road_network():
     d types
     """
     # Define file path
-    edges_path = Path("Geneva/edges.shp")
+    edges_path = Path("paris_center/edges.shp")
     
     # Check if file exists
     if not edges_path.exists():

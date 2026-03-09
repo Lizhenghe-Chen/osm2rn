@@ -1,0 +1,93 @@
+{
+  "analysis_date": "2025-09-08",
+  "dataset": "Shanghai Road Network",
+  "nodes_analysis": {
+    "total_nodes": 106392,
+    "coordinate_bounds": {
+      "lng_min": 2.2408015,
+      "lng_max": 2.4302588,
+      "lat_min": 48.8169934,
+      "lat_max": 48.9086553
+    },
+    "fields": [
+      "node_id",
+      "lon",
+      "lat"
+    ],
+    "sample_data": [
+      {
+        "node_id": 0,
+        "longitude": 2.3694127,
+        "latitude": 48.8215302
+      },
+      {
+        "node_id": 1,
+        "longitude": 2.3693972,
+        "latitude": 48.8215788
+      },
+      {
+        "node_id": 2,
+        "longitude": 2.369386,
+        "latitude": 48.8216103
+      },
+      {
+        "node_id": 3,
+        "longitude": 2.3693695,
+        "latitude": 48.8216639
+      },
+      {
+        "node_id": 4,
+        "longitude": 2.3693516,
+        "latitude": 48.8217028
+      }
+    ]
+  },
+  "edges_analysis": {
+    "total_edges": 115265,
+    "fields": [
+      "eid",
+      "raw_eid",
+      "highway"
+    ],
+    "length_stats": {
+      "min": null,
+      "max": null,
+      "mean": null,
+      "median": null
+    },
+    "sample_data": [
+      {
+        "eid": 0,
+        "raw_eid": 2569,
+        "highway": "tertiary"
+      },
+      {
+        "eid": 44405,
+        "raw_eid": 34855904,
+        "highway": "primary"
+      },
+      {
+        "eid": 48393,
+        "raw_eid": 40001847,
+        "highway": "secondary"
+      },
+      {
+        "eid": 1,
+        "raw_eid": 2569,
+        "highway": "tertiary"
+      },
+      {
+        "eid": 2,
+        "raw_eid": 2569,
+        "highway": "tertiary"
+      }
+    ]
+  },
+  "spatial_overlap": null,
+  "summary": {
+    "total_nodes": 106392,
+    "total_edges": 115265,
+    "spatial_overlap_valid": false,
+    "coverage_ratio": 0
+  }
+}

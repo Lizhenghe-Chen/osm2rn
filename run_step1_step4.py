@@ -25,12 +25,12 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--input-dir",
-        default="Geneva",
-        help="Input dataset directory containing shapefiles (default: Geneva)",
+        default="paris_center",
+        help="Input dataset directory containing shapefiles (default: paris_center)",
     )
     parser.add_argument(
         "--output-dir",
-        default=None,
+        default="Paris",
         help="Output base directory for generated files (default: same as input-dir)",
     )
     return parser.parse_args()

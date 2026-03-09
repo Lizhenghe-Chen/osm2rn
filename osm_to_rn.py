@@ -1,7 +1,7 @@
 import networkx as nx
 import osmium as o
-from osgeo import ogr
 import argparse
+from pathlib import Path
 
 
 class OSM2RNHandler(o.SimpleHandler):
@@ -46,17 +46,53 @@ class OSM2RNHandler(o.SimpleHandler):
 
 
 def store_shp(rn, target_path):
-    ''' nodes: [lng, lat] '''
+    """Store graph as Shapefiles without GDAL/osgeo.
+
+    Output matches the common directory layout:
+    - nodes.shp/.shx/.dbf
+    - edges.shp/.shx/.dbf
+    """
+    try:
+        shapefile = __import__('shapefile')
+    except ImportError as exc:
+        raise ImportError(
+            "pyshp is required to export Shapefiles. Install it with: pip install pyshp"
+        ) from exc
+
     rn.remove_nodes_from(list(nx.isolates(rn)))
     print('# of nodes:{}'.format(rn.number_of_nodes()))
     print('# of edges:{}'.format(rn.number_of_edges()))
-    for _, _, data in rn.edges(data=True):
-        geo_line = ogr.Geometry(ogr.wkbLineString)
-        for coord in data['coords']:
-            geo_line.AddPoint(coord[0], coord[1])
-        data['Wkb'] = geo_line.ExportToWkb()
-        del data['coords']
-    nx.write_shp(rn, target_path)
+
+    output_dir = Path(target_path)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Write nodes shapefile.
+    nodes_writer = shapefile.Writer(str(output_dir / 'nodes'), shapeType=shapefile.POINT)
+    nodes_writer.field('node_id', 'N')
+    nodes_writer.field('lon', 'F', decimal=8)
+    nodes_writer.field('lat', 'F', decimal=8)
+
+    for node_id, node in enumerate(rn.nodes()):
+        lon, lat = node
+        nodes_writer.point(lon, lat)
+        nodes_writer.record(node_id, lon, lat)
+    nodes_writer.close()
+
+    # Write edges shapefile.
+    edges_writer = shapefile.Writer(str(output_dir / 'edges'), shapeType=shapefile.POLYLINE)
+    edges_writer.field('eid', 'N')
+    edges_writer.field('raw_eid', 'N')
+    edges_writer.field('highway', 'C', size=40)
+
+    for u, v, data in rn.edges(data=True):
+        coords = data.get('coords', [u, v])
+        edges_writer.line([coords])
+        edges_writer.record(
+            int(data.get('eid', -1)),
+            int(data.get('raw_eid', -1)),
+            str(data.get('highway', ''))
+        )
+    edges_writer.close()
 
 
 if __name__ == '__main__':
